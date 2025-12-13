@@ -1,0 +1,2777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>问题分析与解决 · 8步法（AI教练版）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --blue-dark: #1e3a8a;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --blue-border: #bfdbfe;
+      --gray-bg: #f9fafb;
+      --gray-border: #d1d5db;
+      --danger: #b91c1c;
+      --success: #15803d;
+      --text-main: #111827;
+      --text-sub: #4b5563;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background: #f3f4f6;
+      color: var(--text-main);
+    }
+
+    header {
+      background: linear-gradient(90deg, #0f172a, var(--blue-dark));
+      color: white;
+      padding: 16px 24px;
+      box-shadow: var(--shadow-soft);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span.badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(191, 219, 254, 0.8);
+    }
+
+    header .sub {
+      margin-top: 6px;
+      font-size: 13px;
+      opacity: 0.9;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header .sub-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 11px;
+      background: rgba(15, 23, 42, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .pill-dot.warn {
+      background: #f97316;
+    }
+
+    .pill-dot.danger {
+      background: #ef4444;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button,
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--blue-border);
+      background: white;
+      color: var(--blue-dark);
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    button.primary,
+    .btn.primary {
+      background: var(--blue);
+      color: white;
+      border-color: #1d4ed8;
+    }
+
+    button.primary:hover,
+    .btn.primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+    }
+
+    button.outline,
+    .btn.outline {
+      background: transparent;
+      color: white;
+      border-color: rgba(191, 219, 254, 0.8);
+    }
+
+    button.outline:hover,
+    .btn.outline:hover {
+      background: rgba(15, 23, 42, 0.4);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 16px auto 32px;
+      padding: 0 16px;
+    }
+
+    .tab-container {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+
+    .tab-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--blue-soft);
+      border-bottom: 1px solid var(--blue-border);
+    }
+
+    .tab-header button {
+      flex: 1 0 120px;
+      border-radius: 0;
+      border: none;
+      border-right: 1px solid var(--blue-border);
+      background: transparent;
+      color: var(--blue-dark);
+      padding: 10px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tab-header button:last-child {
+      border-right: none;
+    }
+
+    .tab-header button.active {
+      background: white;
+      color: var(--blue-dark);
+      border-bottom: 2px solid var(--blue);
+      box-shadow: 0 -2px 0 white inset;
+    }
+
+    .tab-content {
+      padding: 18px 20px 20px;
+      background: white;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    h2.step-title {
+      margin: 0 0 12px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue-dark);
+    }
+
+    h2.step-title span.step-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--blue-border);
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+    }
+
+    p.step-desc {
+      margin: 0 0 16px;
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (min-width: 960px) {
+      .grid-2 {
+        grid-template-columns: 3fr 2fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      background: var(--gray-bg);
+      border-radius: var(--radius-md);
+      padding: 12px 12px 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--gray-border);
+      padding: 6px 8px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+      background: white;
+    }
+
+    input,
+    select {
+      min-height: auto;
+      height: 32px;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      border: 1px solid #e5e7eb;
+      padding: 4px 6px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f4f6;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid #cbd5f5;
+      background: #e0ecff;
+      color: #1e3a8a;
+    }
+
+    .badge.red {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .badge.green {
+      background: #dcfce7;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .ai-panel {
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--blue-border);
+      padding: 10px 10px 8px;
+      background: #eff6ff;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .ai-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .ai-title {
+      font-weight: 600;
+      color: var(--blue-dark);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-title span {
+      font-size: 14px;
+    }
+
+    .ai-output {
+      background: white;
+      border-radius: 6px;
+      border: 1px solid var(--blue-border);
+      padding: 6px 8px;
+      max-height: 180px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .ai-status {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    .flex {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mt-8 {
+      margin-top: 8px;
+    }
+
+    .mt-12 {
+      margin-top: 12px;
+    }
+
+    .mt-16 {
+      margin-top: 16px;
+    }
+
+    .mb-4 {
+      margin-bottom: 4px;
+    }
+
+    .tag-list {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      font-size: 11px;
+      color: #6b7280;
+      cursor: default;
+    }
+
+    .priority-high {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    .priority-medium {
+      color: #d97706;
+      font-weight: 500;
+    }
+
+    .priority-low {
+      color: #15803d;
+      font-weight: 500;
+    }
+
+    .kpi-gap {
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: #fef3c7;
+      border: 1px solid #facc15;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .report-block {
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 12px 12px 10px;
+      margin-bottom: 10px;
+      background: #f9fafb;
+    }
+
+    .report-block h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--blue-dark);
+    }
+
+    .report-block p {
+      margin: 2px 0;
+      font-size: 13px;
+    }
+
+    .small {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .danger-text {
+      color: var(--danger);
+    }
+
+    .success-text {
+      color: var(--success);
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>
+    问题分析与解决 · 8步法
+    <span class="badge">AI 教练版 · 商务蓝</span>
+  </h1>
+  <div class="sub">
+    <div class="sub-left">
+      <span class="pill">
+        <span class="pill-dot"></span> 状态：进行中
+      </span>
+      <span class="pill">
+        <span class="pill-dot warn"></span> 建议：每一步完成后再点击 AI 教练
+      </span>
+      <span class="pill">
+        <span class="pill-dot danger"></span> 提醒：项目数据仅保存在本机浏览器（localStorage）
+      </span>
+    </div>
+    <div class="header-actions">
+      <button class="outline" id="btn-clear-all">清空全部数据</button>
+      <button class="outline" id="btn-generate-report">生成最终报告</button>
+      <button class="primary" id="btn-download-report">导出报告 HTML</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tab-container">
+    <div class="tab-header">
+      <button class="active" data-tab="step1">Step1 明确问题与目标</button>
+      <button data-tab="step2">Step2 分解问题（假设 & 证据）</button>
+      <button data-tab="step3">Step3 关键问题目标设定</button>
+      <button data-tab="step4">Step4 原因分析（逻辑树）</button>
+      <button data-tab="step5">Step5 对策选择与评估</button>
+      <button data-tab="step6">Step6 行动计划 & 看板</button>
+      <button data-tab="step7">Step7 过程 & 结果评估</button>
+      <button data-tab="step8">Step8 标准化 & 复盘</button>
+      <button data-tab="report">最终报告预览</button>
+    </div>
+
+    <div class="tab-content">
+
+      <!-- Step1 -->
+      <section id="step1" class="tab-panel active">
+        <h2 class="step-title">
+          <span class="step-badge">Step1</span> 明确问题与目标（含 5W2H）
+        </h2>
+        <p class="step-desc">
+          先从「理想状态 → 现状 → KPI 差距 → 大而模糊的问题」把问题框住，再用 5W2H 对现状做结构化描述，为后续分解问题提供依据。
+        </p>
+
+        <div class="grid grid-2">
+          <!-- left: ideal & current -->
+          <div class="grid">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">更高的理想状态（长期目标）</div>
+                  <div class="card-sub">站在 1~3 年后的视角，用业务语言描述希望达到的状态</div>
+                </div>
+              </div>
+              <textarea id="s1-ideal"></textarea>
+              <div class="hint">例如：门店人均销售额 ≥ XX 万／月，投诉率 &lt; 0.3% 等。</div>
+            </div>
+
+            <div class="grid grid-2">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">理想状态 · 关键 KPIs</div>
+                </div>
+                <textarea id="s1-ideal-kpi" placeholder="列出与本项目相关的 2~4 个量化指标及目标值"></textarea>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">现状 · 关键 KPIs</div>
+                </div>
+                <textarea id="s1-current-kpi" placeholder="对应上方指标的当前数值（含时间、范围说明）"></textarea>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">KPI 差距 & 大而模糊的问题</div>
+              </div>
+              <textarea id="s1-gap" placeholder="用一两句话描述 KPI 差距，例如：人均销售额比目标低 15%，退货率比目标高 2.3 个百分点。"></textarea>
+              <div class="kpi-gap" id="s1-gap-pill">
+                <span>当前差距：</span>
+                <strong id="s1-gap-short">待 AI 帮你提炼</strong>
+              </div>
+              <label class="mt-8">我们要解决的那个“大而模糊的问题”（一句话）</label>
+              <textarea id="s1-big-problem" placeholder="例如：如何在不增加人手的情况下，把门店人均销售额提升到 XX 万／月？"></textarea>
+            </div>
+          </div>
+
+          <!-- right: 5W2H -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">现状 5W2H 描述</div>
+                <div class="card-sub">检查自己是否真正看清了“问题长什么样”</div>
+              </div>
+            </div>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What - 什么问题？</th>
+                  <td><textarea id="s1-5w-what" placeholder="核心现象是什么？用 1~2 句可量化的描述。"></textarea></td>
+                </tr>
+                <tr>
+                  <th>Where - 在哪里发生？</th>
+                  <td><textarea id="s1-5w-where" placeholder="发生的地点、区域、门店、业务单元等。"></textarea></td>
+                </tr>
+                <tr>
+                  <th>When - 何时发生/发现？</th>
+                  <td><textarea id="s1-5w-when" placeholder="时间段、班次、季节等。"></textarea></td>
+                </tr>
+                <tr>
+                  <th>Who - 由谁发现/涉及谁？</th>
+                  <td><textarea id="s1-5w-who" placeholder="涉及的角色、岗位、客户群体等。"></textarea></td>
+                </tr>
+                <tr>
+                  <th>Why - 为什么这是个问题？</th>
+                  <td><textarea id="s1-5w-why" placeholder="如果不解决，会导致什么影响（成本、客户、效率、风险等）。"></textarea></td>
+                </tr>
+                <tr>
+                  <th>How - 如何发现？</th>
+                  <td><textarea id="s1-5w-how" placeholder="通过什么渠道、报表、客户反馈、现场观察发现的？"></textarea></td>
+                </tr>
+                <tr>
+                  <th>How much - 有多严重？</th>
+                  <td><textarea id="s1-5w-howmuch" placeholder="发生频次、金额、比率、趋势等。"></textarea></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="hint mt-8">5W2H 写得越具体，后面分解问题时越容易找到切入点。</div>
+
+            <div class="ai-panel mt-12">
+              <div class="ai-panel-header">
+                <div class="ai-title"><span>🤖</span> AI 教练 · Step1 诊断</div>
+                <div class="flex">
+                  <button class="btn primary" id="btn-ai-step1">AI 教练评价本步</button>
+                  <button class="btn" id="btn-ai-step1-apply">将 AI 建议推送到 Step2</button>
+                </div>
+              </div>
+              <div class="ai-output" id="ai-step1-output">完成 Step1 填写后点击“AI 教练评价本步”，我会帮你检查 5W2H 的完整性、问题描述是否聚焦，并提炼出一条适合在 Step2 使用的总问题句。</div>
+              <div class="ai-status" id="ai-step1-status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step2 -->
+      <section id="step2" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step2</span> 分解问题（假设问题 · 逻辑树 · 证据验证）
+        </h2>
+        <p class="step-desc">
+          围绕 Step1 的“大而模糊的问题”，以“是否存在……问题”的格式提出多个假设问题，用结构/流程/时间等维度做逻辑分解，并为每个假设准备证据与验证数据，同时给出重要度与紧急度，用来筛选关键性问题。
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Step1 传入的大问题</div>
+              <div class="card-sub">如果为空，可回到 Step1 完善后再同步</div>
+            </div>
+            <button class="btn" id="btn-s2-sync-from-step1">从 Step1 同步</button>
+          </div>
+          <textarea id="s2-root-problem" readonly style="min-height:60px;background:#f3f4f6;"></textarea>
+        </div>
+
+        <div class="grid grid-2 mt-12">
+          <!-- 左侧：新增假设问题 -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">新增假设问题</div>
+                <div class="card-sub">建议每一条都用“是否存在……问题”来表述</div>
+              </div>
+            </div>
+
+            <label>假设问题描述</label>
+            <textarea id="s2-new-text" placeholder="例如：是否存在新品上架信息未及时同步到门店一线的问题？"></textarea>
+
+            <label class="mt-8">逻辑分解维度</label>
+            <select id="s2-new-dimension">
+              <option value="">请选择</option>
+              <option value="结构/组成">按结构/组成要素分解（人/机/料/法/环/测）</option>
+              <option value="流程/时间">按流程阶段或时间顺序分解</option>
+              <option value="空间/区域">按区域/渠道/门店类型分解</option>
+              <option value="客户/对象">按客户类型/对象分解</option>
+              <option value="其它">其它合适的逻辑维度</option>
+            </select>
+
+            <label class="mt-8">上级问题（可选，用于形成问题逻辑树）</label>
+            <select id="s2-new-parent">
+              <option value="">无（作为一级假设）</option>
+            </select>
+
+            <label class="mt-8">依据/证据说明</label>
+            <textarea id="s2-new-evidence" placeholder="列出支持该假设的现象、数据、报表或附件说明。"></textarea>
+
+            <div class="grid grid-3 mt-8">
+              <div>
+                <label>重要度（1~5）</label>
+                <input id="s2-new-importance" type="number" min="1" max="5" value="3" />
+              </div>
+              <div>
+                <label>紧急度（1~5）</label>
+                <input id="s2-new-urgency" type="number" min="1" max="5" value="3" />
+              </div>
+              <div>
+                <label>潜在关键问题？</label>
+                <select id="s2-new-key">
+                  <option value="no">否</option>
+                  <option value="yes">是</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn primary mt-8" id="btn-s2-add-hypo">添加假设问题</button>
+            <div class="hint mt-4">建议从 3~7 个假设开始，后续可在 AI 教练的建议下继续补充。</div>
+          </div>
+
+          <!-- 右侧：假设问题列表 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">假设问题列表（含优先级和关键性标记）</div>
+              <div class="flex">
+                <span class="small">优先级 = 重要度 × 紧急度</span>
+                <button class="btn" id="btn-s2-sort">按优先级排序</button>
+              </div>
+            </div>
+
+            <div style="max-height:320px;overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>假设问题</th>
+                    <th>维度</th>
+                    <th>上级</th>
+                    <th>依据/证据</th>
+                    <th>重</th>
+                    <th>急</th>
+                    <th>关键?</th>
+                    <th>删</th>
+                  </tr>
+                </thead>
+                <tbody id="s2-hypo-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="tag-list mt-8" id="s2-key-tags"></div>
+
+            <div class="ai-panel mt-12">
+              <div class="ai-panel-header">
+                <div class="ai-title"><span>🤖</span> AI 教练 · Step2 诊断</div>
+                <div class="flex">
+                  <button class="btn primary" id="btn-ai-step2">AI 教练评价本步</button>
+                  <button class="btn" id="btn-ai-step2-apply">将 AI 建议推送到 Step3</button>
+                </div>
+              </div>
+              <div class="ai-output" id="ai-step2-output">
+                我会帮你检查：① 假设问题是否真的是“问题”而不是解决方案；② 分解维度是否具有逻辑性（结构/流程/时间等）；③ 是否有明显缺失的假设；④ 根据重要度&紧急度，哪些更可能是关键问题；⑤ 建议验证每个假设需要收集哪些数据。
+              </div>
+              <div class="ai-status" id="ai-step2-status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step3 -->
+      <section id="step3" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step3</span> 关键性问题的目标设定
+        </h2>
+        <p class="step-desc">
+          从 Step2 中筛出的关键性问题出发，为每个关键问题设定清晰、可量化、可在项目周期内实现的目标，并对应 KPI 指标，为后面的原因分析和对策制定指明方向。
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">从 Step2 导入关键性问题</div>
+            <button class="btn" id="btn-s3-import">导入/刷新</button>
+          </div>
+          <div class="hint">导入规则：会自动抓取 Step2 中标记为“关键?” = 是的假设问题；你也可以在下表中手工调整目标。</div>
+        </div>
+
+        <div class="card mt-12">
+          <div class="card-header">
+            <div class="card-title">关键性问题清单 & 目标</div>
+          </div>
+          <div style="max-height:360px;overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>关键性问题（来自 Step2 的假设）</th>
+                  <th>目标描述（内部可控表述）</th>
+                  <th>KPI 名称</th>
+                  <th>当前值</th>
+                  <th>目标值</th>
+                  <th>达成时间</th>
+                </tr>
+              </thead>
+              <tbody id="s3-key-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="ai-panel mt-12">
+            <div class="ai-panel-header">
+              <div class="ai-title"><span>🤖</span> AI 教练 · Step3 诊断</div>
+              <div class="flex">
+                <button class="btn primary" id="btn-ai-step3">AI 教练评价本步</button>
+                <button class="btn" id="btn-ai-step3-apply">将 AI 建议推送到 Step4</button>
+              </div>
+            </div>
+            <div class="ai-output" id="ai-step3-output">
+              我会从 SMART 原则出发，检查目标是否具体（Specific）、可度量（Measurable）、可达成（Achievable）、与上位目标一致（Relevant）、有明确期限（Time-bound），并帮助你提炼适合作为 Step4 根问题的表述。
+            </div>
+            <div class="ai-status" id="ai-step3-status"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step4 -->
+      <section id="step4" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step4</span> 原因分析（针对每个关键问题的原因逻辑树）
+        </h2>
+        <p class="step-desc">
+          选择一个关键问题，构建对应的“为什么”多层原因逻辑树。要求：原因是可验证、可被对策直接作用的“可控因素”，避免只重复描述现象。
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">选择要分析的关键问题</div>
+            <select id="s4-key-select" style="max-width:420px;"></select>
+          </div>
+          <div class="hint">说明：每个关键问题都会对应一棵独立的原因树。切换下拉框即可在不同原因树之间切换。</div>
+        </div>
+
+        <div class="grid grid-2 mt-12">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">新增原因节点（5WHY 思路）</div>
+            </div>
+            <label>原因层级（Why 几？）</label>
+            <select id="s4-new-level">
+              <option value="1">Why1 · 直接原因（紧贴现象）</option>
+              <option value="2">Why2 · 直接原因的上游原因</option>
+              <option value="3">Why3</option>
+              <option value="4">Why4</option>
+              <option value="5">Why5</option>
+            </select>
+
+            <label class="mt-8">上级原因（可选）</label>
+            <select id="s4-new-parent">
+              <option value="">无（作为该关键问题的一级原因）</option>
+            </select>
+
+            <label class="mt-8">原因描述</label>
+            <textarea id="s4-new-text" placeholder="注意写成可被验证、可被行动改变的“原因”，而不是简单重复现象。"></textarea>
+
+            <label class="mt-8">需要哪些数据/事实来验证该原因？</label>
+            <textarea id="s4-new-data" placeholder="例如：某流程的时间戳数据、抽样检查结果、记录表、现场照片等。"></textarea>
+
+            <label class="mt-8">目前掌握的证据（如有）</label>
+            <textarea id="s4-new-evidence"></textarea>
+
+            <button class="btn primary mt-8" id="btn-s4-add-cause">添加原因</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">当前关键问题的原因逻辑树（列表视图）</div>
+            </div>
+            <div style="max-height:340px;overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>层级</th>
+                    <th>上级原因</th>
+                    <th>原因描述</th>
+                    <th>验证数据/事实</th>
+                    <th>证据</th>
+                    <th>删</th>
+                  </tr>
+                </thead>
+                <tbody id="s4-cause-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="ai-panel mt-12">
+              <div class="ai-panel-header">
+                <div class="ai-title"><span>🤖</span> AI 教练 · Step4 诊断</div>
+                <div class="flex">
+                  <button class="btn primary" id="btn-ai-step4">AI 教练评价本步</button>
+                  <button class="btn" id="btn-ai-step4-apply">将 AI 建议推送到 Step5</button>
+                </div>
+              </div>
+              <div class="ai-output" id="ai-step4-output">
+                我会检查：1）原因是否真正解释了现象，而不是重复现象；2）不同原因之间是否存在因果关系；3）是否覆盖了人/机/料/法/环/测等常见维度；4）哪些原因更可能是“根本原因”，适合在 Step5 针对性制定对策。
+              </div>
+              <div class="ai-status" id="ai-step4-status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step5 -->
+      <section id="step5" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step5</span> 对策选择与评估
+        </h2>
+        <p class="step-desc">
+          针对每个关键问题下的根本原因，设计不少于 3 个候选对策，从“可控性、可行性、成效、成本”等维度进行量化评估，选出优先实施的对策。
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">选择关键问题 & 关联原因</div>
+          </div>
+          <div class="grid grid-2">
+            <div>
+              <label>关键问题</label>
+              <select id="s5-key-select"></select>
+            </div>
+            <div>
+              <label>要针对的原因</label>
+              <select id="s5-cause-select"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2 mt-12">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">新增对策</div>
+            </div>
+            <label>对策描述</label>
+            <textarea id="s5-new-plan" placeholder="写清楚要改变什么流程/制度/行为，而不是模糊的“加强管理”。"></textarea>
+
+            <div class="grid grid-4 mt-8">
+              <div>
+                <label>可控性 (1~5)</label>
+                <input id="s5-new-controllable" type="number" min="1" max="5" value="3" />
+              </div>
+              <div>
+                <label>可行性 (1~5)</label>
+                <input id="s5-new-feasible" type="number" min="1" max="5" value="3" />
+              </div>
+              <div>
+                <label>成效 (1~5)</label>
+                <input id="s5-new-effect" type="number" min="1" max="5" value="3" />
+              </div>
+              <div>
+                <label>成本 (1~5，分数越高成本越低)</label>
+                <input id="s5-new-cost" type="number" min="1" max="5" value="3" />
+              </div>
+            </div>
+
+            <button class="btn primary mt-8" id="btn-s5-add-plan">添加对策</button>
+            <div class="hint mt-4">总分 = 可控性 + 可行性 + 成效 + 成本。可以优先选择得分高且与根本原因紧密对应的对策。</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">对策评估表</div>
+            </div>
+            <div style="max-height:340px;overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>关键问题</th>
+                    <th>对应原因</th>
+                    <th>对策描述</th>
+                    <th>控</th>
+                    <th>行</th>
+                    <th>效</th>
+                    <th>成</th>
+                    <th>总分</th>
+                    <th>删</th>
+                  </tr>
+                </thead>
+                <tbody id="s5-plan-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="ai-panel mt-12">
+              <div class="ai-panel-header">
+                <div class="ai-title"><span>🤖</span> AI 教练 · Step5 诊断</div>
+                <div class="flex">
+                  <button class="btn primary" id="btn-ai-step5">AI 教练评价本步</button>
+                  <button class="btn" id="btn-ai-step5-apply">将 AI 建议推送到 Step6</button>
+                </div>
+              </div>
+              <div class="ai-output" id="ai-step5-output">
+                我会检查：① 对策是否一一对应到具体原因；② 是否存在“多头管理、重复对策”；③ 是否考虑了执行成本与风险；④ 建议优先实施的对策组合。
+              </div>
+              <div class="ai-status" id="ai-step5-status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step6 -->
+      <section id="step6" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step6</span> 制定行动计划 & 看板管理
+        </h2>
+        <p class="step-desc">
+          将选定的对策拆解为可执行的行动任务，明确责任人、起止时间、关键里程碑与检查点，以小步快跑、可视化跟踪的方式推进落地。
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">选择来源对策</div>
+          </div>
+          <div class="grid grid-2">
+            <div>
+              <label>关键问题</label>
+              <select id="s6-key-select"></select>
+            </div>
+            <div>
+              <label>对策</label>
+              <select id="s6-plan-select"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2 mt-12">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">新增行动任务</div>
+            </div>
+            <label>行动任务内容</label>
+            <textarea id="s6-new-task" placeholder="用动词开头描述要做的事情（例如：制定XX流程、梳理XX清单、开发XX看板等）。"></textarea>
+            <div class="grid grid-3 mt-8">
+              <div>
+                <label>责任人</label>
+                <input id="s6-new-owner" type="text" />
+              </div>
+              <div>
+                <label>计划开始</label>
+                <input id="s6-new-start" type="date" />
+              </div>
+              <div>
+                <label>计划完成</label>
+                <input id="s6-new-end" type="date" />
+              </div>
+            </div>
+            <label class="mt-8">里程碑/检查点说明</label>
+            <textarea id="s6-new-milestone"></textarea>
+            <button class="btn primary mt-8" id="btn-s6-add-action">添加行动</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">行动计划看板（简版）</div>
+            </div>
+            <div style="max-height:340px;overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>关键问题</th>
+                    <th>对策</th>
+                    <th>任务</th>
+                    <th>责任人</th>
+                    <th>起</th>
+                    <th>止</th>
+                    <th>状态</th>
+                    <th>删</th>
+                  </tr>
+                </thead>
+                <tbody id="s6-action-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="ai-panel mt-12">
+              <div class="ai-panel-header">
+                <div class="ai-title"><span>🤖</span> AI 教练 · Step6 诊断</div>
+                <div class="flex">
+                  <button class="btn primary" id="btn-ai-step6">AI 教练评价本步</button>
+                  <button class="btn" id="btn-ai-step6-apply">将 AI 建议推送到 Step7</button>
+                </div>
+              </div>
+              <div class="ai-output" id="ai-step6-output">
+                我会关注：任务是否拆得足够具体、责任是否明确、节奏是否合理，并提醒你可能被忽略的风险控制点。
+              </div>
+              <div class="ai-status" id="ai-step6-status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step7 -->
+      <section id="step7" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step7</span> 过程 & 结果评估
+        </h2>
+        <p class="step-desc">
+          通过目标性指标和其他辅助指标，对改善前后进行对比评估，同时反思过程中有哪些经验和教训，为后续标准化与复制做准备。
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">从 Step3 导入目标性指标</div>
+            <button class="btn" id="btn-s7-import">导入/刷新</button>
+          </div>
+          <div class="hint">会根据 Step3 中的关键问题目标自动生成对应的 KPI 评估行，你也可以在下方补充其他指标。</div>
+        </div>
+
+        <div class="card mt-12">
+          <div class="card-header">
+            <div class="card-title">指标对比表</div>
+          </div>
+          <div style="max-height:340px;overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>类别</th>
+                  <th>关键问题/指标说明</th>
+                  <th>改善前</th>
+                  <th>目标值</th>
+                  <th>改善后</th>
+                  <th>% 改善</th>
+                  <th>删</th>
+                </tr>
+              </thead>
+              <tbody id="s7-kpi-tbody"></tbody>
+            </table>
+          </div>
+
+          <label class="mt-8">过程中的关键发现与学习</label>
+          <textarea id="s7-process-notes" placeholder="记录过程中观察到的规律、关键成功要素和踩过的坑。"></textarea>
+
+          <div class="ai-panel mt-12">
+            <div class="ai-panel-header">
+              <div class="ai-title"><span>🤖</span> AI 教练 · Step7 诊断</div>
+              <div class="flex">
+                <button class="btn primary" id="btn-ai-step7">AI 教练评价本步</button>
+                <button class="btn" id="btn-ai-step7-apply">将 AI 建议推送到 Step8</button>
+              </div>
+            </div>
+            <div class="ai-output" id="ai-step7-output">
+              我会帮你：① 总结本次改善项目在结果上的亮点与不足；② 提醒你评估结果中可能存在的统计偏差；③ 提炼 2~3 条可以复制推广的经验要点。
+            </div>
+            <div class="ai-status" id="ai-step7-status"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step8 -->
+      <section id="step8" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Step8</span> 标准化 & 复盘
+        </h2>
+        <p class="step-desc">
+          把有效做法沉淀为可复制的标准和资源，形成标准化支持计划；同时完成个人与团队的复盘，明确下一轮改进的着力点。
+        </p>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">标准化支持计划</div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>标准化内容/文件</th>
+                  <th>责任人</th>
+                  <th>完成时间</th>
+                  <th>完成度%</th>
+                  <th>删</th>
+                </tr>
+              </thead>
+              <tbody id="s8-std-tbody"></tbody>
+            </table>
+            <button class="btn primary mt-8" id="btn-s8-add-std">新增标准化条目</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">个人复盘（工具实践 / 目标结果 / 组织贡献 / 上级沟通等）</div>
+            </div>
+            <textarea id="s8-retro" style="min-height:220px;" placeholder="从“做得好的地方 / 需要改进的能力 / 下一个项目要避免的坑”三个角度做简短复盘。"></textarea>
+
+            <div class="ai-panel mt-12">
+              <div class="ai-panel-header">
+                <div class="ai-title"><span>🤖</span> AI 教练 · Step8 诊断</div>
+                <div class="flex">
+                  <button class="btn primary" id="btn-ai-step8">AI 教练评价本步</button>
+                </div>
+              </div>
+              <div class="ai-output" id="ai-step8-output">
+                我会根据前 7 步的信息，帮你提炼：1）可以在团队/组织层面推广的做法；2）个人在问题分析与解决能力上的提升点；3）下一轮 PDCA 可以关注的方向。
+              </div>
+              <div class="ai-status" id="ai-step8-status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Report -->
+      <section id="report" class="tab-panel">
+        <h2 class="step-title">
+          <span class="step-badge">Report</span> 项目问题分析与解决报告（预览）
+        </h2>
+        <p class="step-desc">
+          这里根据前 1~8 步的数据自动生成一份结构化的项目报告，你可以导出为独立 HTML 文件进行分享或打印。
+        </p>
+
+        <div class="flex mb-4">
+          <button class="btn primary" id="btn-report-refresh">刷新报告</button>
+        </div>
+
+        <div id="report-content" style="font-size:13px;"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --------------- 全局状态 & 本地存储 -----------------
+  const STORAGE_KEY = "pas8_ai_tool_state_v1";
+
+  const defaultState = {
+    step1: {
+      ideal: "",
+      idealKPI: "",
+      currentKPI: "",
+      gap: "",
+      gapShort: "",
+      bigProblem: "",
+      w: {
+        what: "",
+        where: "",
+        when: "",
+        who: "",
+        why: "",
+        how: "",
+        howmuch: "",
+      },
+    },
+    step2: {
+      hypotheses: [], // {id,text,dimension,parentId,evidence,importance,urgency,isKey}
+      aiSuggestion: null,
+    },
+    step3: {
+      keyProblems: [], // {id,sourceHypoId,sourceText,goal,kpiName,currentValue,targetValue,deadline}
+      aiSuggestion: null,
+    },
+    step4: {
+      causes: [], // {id,keyProblemId,level,parentId,text,dataNeeded,evidence}
+      currentKeyProblemId: "",
+      aiSuggestion: null,
+    },
+    step5: {
+      plans: [], // {id,keyProblemId,causeId,desc,controllable,feasible,effect,cost}
+      aiSuggestion: null,
+    },
+    step6: {
+      actions: [], // {id,keyProblemId,planId,task,owner,start,end,status}
+      aiSuggestion: null,
+    },
+    step7: {
+      kpis: [], // {id,category,refKeyProblemId,label,before,target,after,improvePercent}
+      processNotes: "",
+      aiSuggestion: null,
+    },
+    step8: {
+      standards: [], // {id,title,owner,due,progress}
+      retro: "",
+      aiSuggestion: null,
+    },
+    ai: {
+      step1: null,
+      step2: null,
+      step3: null,
+      step4: null,
+      step5: null,
+      step6: null,
+      step7: null,
+      step8: null,
+    },
+  };
+
+  let state = loadState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(defaultState);
+      const obj = JSON.parse(raw);
+      return Object.assign(structuredClone(defaultState), obj);
+    } catch (e) {
+      console.warn("loadState error", e);
+      return structuredClone(defaultState);
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function uuid() {
+    return (
+      Date.now().toString(36) +
+      "-" +
+      Math.random().toString(36).substring(2, 8)
+    );
+  }
+
+  // --------------- Tab 切换 -----------------
+  document.querySelectorAll(".tab-header button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      document
+        .querySelectorAll(".tab-header button")
+        .forEach((b) => b.classList.toggle("active", b === btn));
+      document
+        .querySelectorAll(".tab-panel")
+        .forEach((p) => p.classList.toggle("active", p.id === tab));
+      if (tab === "report") {
+        buildReport();
+      }
+    });
+  });
+
+  // --------------- Step1 绑定 -----------------
+  function initStep1() {
+    const s = state.step1;
+    document.getElementById("s1-ideal").value = s.ideal;
+    document.getElementById("s1-ideal-kpi").value = s.idealKPI;
+    document.getElementById("s1-current-kpi").value = s.currentKPI;
+    document.getElementById("s1-gap").value = s.gap;
+    document.getElementById("s1-gap-short").textContent =
+      s.gapShort || "尚未提炼";
+    document.getElementById("s1-big-problem").value = s.bigProblem;
+
+    document.getElementById("s1-5w-what").value = s.w.what;
+    document.getElementById("s1-5w-where").value = s.w.where;
+    document.getElementById("s1-5w-when").value = s.w.when;
+    document.getElementById("s1-5w-wwho");
+    document.getElementById("s1-5w-who").value = s.w.who;
+    document.getElementById("s1-5w-why").value = s.w.why;
+    document.getElementById("s1-5w-how").value = s.w.how;
+    document.getElementById("s1-5w-howmuch").value = s.w.howmuch;
+
+    bindInput("s1-ideal", (v) => (state.step1.ideal = v));
+    bindInput("s1-ideal-kpi", (v) => (state.step1.idealKPI = v));
+    bindInput("s1-current-kpi", (v) => (state.step1.currentKPI = v));
+    bindInput("s1-gap", (v) => (state.step1.gap = v));
+    bindInput("s1-big-problem", (v) => (state.step1.bigProblem = v));
+
+    bindInput("s1-5w-what", (v) => (state.step1.w.what = v));
+    bindInput("s1-5w-where", (v) => (state.step1.w.where = v));
+    bindInput("s1-5w-when", (v) => (state.step1.w.when = v));
+    bindInput("s1-5w-who", (v) => (state.step1.w.who = v));
+    bindInput("s1-5w-why", (v) => (state.step1.w.why = v));
+    bindInput("s1-5w-how", (v) => (state.step1.w.how = v));
+    bindInput("s1-5w-howmuch", (v) => (state.step1.w.howmuch = v));
+  }
+
+  function bindInput(id, updater) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      updater(el.value);
+      saveState();
+    });
+  }
+
+  // --------------- Step2 渲染 & 事件 -----------------
+  function renderStep2() {
+    document.getElementById("s2-root-problem").value =
+      state.step1.bigProblem || "（尚未从 Step1 同步，请在 Step1 中填写“大问题”）";
+
+    const selectParent = document.getElementById("s2-new-parent");
+    while (selectParent.options.length > 1) {
+      selectParent.remove(1);
+    }
+    state.step2.hypotheses.forEach((h) => {
+      const opt = document.createElement("option");
+      opt.value = h.id;
+      opt.textContent = h.text.slice(0, 30);
+      selectParent.appendChild(opt);
+    });
+
+    // list
+    const tbody = document.getElementById("s2-hypo-tbody");
+    tbody.innerHTML = "";
+    state.step2.hypotheses.forEach((h, idx) => {
+      const tr = document.createElement("tr");
+      const priority = (Number(h.importance) || 0) * (Number(h.urgency) || 0);
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td><textarea data-hypo-id="${h.id}" data-field="text">${h.text}</textarea></td>
+        <td>
+          <select data-hypo-id="${h.id}" data-field="dimension">
+            ${renderOptions(
+              ["", "结构/组成", "流程/时间", "空间/区域", "客户/对象", "其它"],
+              h.dimension
+            )}
+          </select>
+        </td>
+        <td>
+          <select data-hypo-id="${h.id}" data-field="parentId">
+            <option value="">无</option>
+            ${state.step2.hypotheses
+              .map(
+                (x) =>
+                  `<option value="${x.id}" ${
+                    x.id === h.parentId ? "selected" : ""
+                  }>${x.text.slice(0, 12)}</option>`
+              )
+              .join("")}
+          </select>
+        </td>
+        <td><textarea data-hypo-id="${h.id}" data-field="evidence">${h.evidence || ""}</textarea></td>
+        <td><input type="number" min="1" max="5" data-hypo-id="${h.id}" data-field="importance" value="${
+        h.importance || 3
+      }"/></td>
+        <td><input type="number" min="1" max="5" data-hypo-id="${h.id}" data-field="urgency" value="${
+        h.urgency || 3
+      }"/></td>
+        <td>
+          <select data-hypo-id="${h.id}" data-field="isKey">
+            <option value="no" ${h.isKey ? "" : "selected"}>否</option>
+            <option value="yes" ${h.isKey ? "selected" : ""}>是</option>
+          </select>
+          <div class="small">${priority ? "优先级：" + priority : ""}</div>
+        </td>
+        <td class="text-right"><button class="btn" data-delete-hypo="${h.id}">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // key tags
+    const tagBox = document.getElementById("s2-key-tags");
+    tagBox.innerHTML = "";
+    state.step2.hypotheses
+      .filter((h) => h.isKey)
+      .forEach((h) => {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = "关键候选：" + h.text.slice(0, 18);
+        tagBox.appendChild(span);
+      });
+  }
+
+  function renderOptions(arr, value) {
+    return arr
+      .map((x) => {
+        if (!x) return `<option value=""></option>`;
+        return `<option value="${x}" ${
+          x === value ? "selected" : ""
+        }>${x}</option>`;
+      })
+      .join("");
+  }
+
+  document
+    .getElementById("s2-hypo-tbody")
+    .addEventListener("input", (e) => {
+      const target = e.target;
+      const id = target.dataset.hypoId;
+      const field = target.dataset.field;
+      if (!id || !field) return;
+      const h = state.step2.hypotheses.find((x) => x.id === id);
+      if (!h) return;
+      h[field] = target.value;
+      saveState();
+    });
+
+  document
+    .getElementById("s2-hypo-tbody")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-hypo]");
+      if (!btn) return;
+      const id = btn.dataset.deleteHypo;
+      state.step2.hypotheses = state.step2.hypotheses.filter(
+        (x) => x.id !== id
+      );
+      saveState();
+      renderStep2();
+    });
+
+  document.getElementById("btn-s2-add-hypo").addEventListener("click", () => {
+    const text = document.getElementById("s2-new-text").value.trim();
+    if (!text) {
+      alert("请先填写假设问题描述。");
+      return;
+    }
+    const h = {
+      id: uuid(),
+      text,
+      dimension: document.getElementById("s2-new-dimension").value,
+      parentId: document.getElementById("s2-new-parent").value || "",
+      evidence: document.getElementById("s2-new-evidence").value.trim(),
+      importance: Number(
+        document.getElementById("s2-new-importance").value || 3
+      ),
+      urgency: Number(document.getElementById("s2-new-urgency").value || 3),
+      isKey: document.getElementById("s2-new-key").value === "yes",
+    };
+    state.step2.hypotheses.push(h);
+    saveState();
+    document.getElementById("s2-new-text").value = "";
+    document.getElementById("s2-new-evidence").value = "";
+    renderStep2();
+  });
+
+  document.getElementById("btn-s2-sort").addEventListener("click", () => {
+    state.step2.hypotheses.sort((a, b) => {
+      const pa = (a.importance || 0) * (a.urgency || 0);
+      const pb = (b.importance || 0) * (b.urgency || 0);
+      return pb - pa;
+    });
+    saveState();
+    renderStep2();
+  });
+
+  document
+    .getElementById("btn-s2-sync-from-step1")
+    .addEventListener("click", () => {
+      document.getElementById("s2-root-problem").value =
+        state.step1.bigProblem || "";
+    });
+
+  // --------------- Step3 渲染 & 事件 -----------------
+  function renderStep3() {
+    const tbody = document.getElementById("s3-key-tbody");
+    tbody.innerHTML = "";
+    state.step3.keyProblems.forEach((kp, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>${kp.sourceText}</td>
+        <td><textarea data-kp-id="${kp.id}" data-kp-field="goal">${
+        kp.goal || ""
+      }</textarea></td>
+        <td><input data-kp-id="${kp.id}" data-kp-field="kpiName" value="${
+        kp.kpiName || ""
+      }"/></td>
+        <td><input data-kp-id="${kp.id}" data-kp-field="currentValue" value="${
+        kp.currentValue || ""
+      }"/></td>
+        <td><input data-kp-id="${kp.id}" data-kp-field="targetValue" value="${
+        kp.targetValue || ""
+      }"/></td>
+        <td><input type="date" data-kp-id="${kp.id}" data-kp-field="deadline" value="${
+        kp.deadline || ""
+      }"/></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById("btn-s3-import").addEventListener("click", () => {
+    const keyHypos = state.step2.hypotheses.filter((h) => h.isKey);
+    keyHypos.forEach((h) => {
+      if (!state.step3.keyProblems.find((kp) => kp.sourceHypoId === h.id)) {
+        state.step3.keyProblems.push({
+          id: uuid(),
+          sourceHypoId: h.id,
+          sourceText: h.text,
+          goal: "",
+          kpiName: "",
+          currentValue: "",
+          targetValue: "",
+          deadline: "",
+        });
+      }
+    });
+    saveState();
+    renderStep3();
+  });
+
+  document
+    .getElementById("s3-key-tbody")
+    .addEventListener("input", (e) => {
+      const id = e.target.dataset.kpId;
+      const field = e.target.dataset.kpField;
+      if (!id || !field) return;
+      const kp = state.step3.keyProblems.find((x) => x.id === id);
+      if (!kp) return;
+      kp[field] = e.target.value;
+      saveState();
+    });
+
+  // --------------- Step4 渲染 & 事件 -----------------
+  function renderStep4KeySelect() {
+    const sel = document.getElementById("s4-key-select");
+    sel.innerHTML = "";
+    const def = document.createElement("option");
+    def.value = "";
+    def.textContent = "请选择关键问题";
+    sel.appendChild(def);
+    state.step3.keyProblems.forEach((kp) => {
+      const opt = document.createElement("option");
+      opt.value = kp.id;
+      opt.textContent = kp.sourceText.slice(0, 40);
+      sel.appendChild(opt);
+    });
+    if (state.step4.currentKeyProblemId) {
+      sel.value = state.step4.currentKeyProblemId;
+    }
+  }
+
+  function renderStep4() {
+    renderStep4KeySelect();
+
+    const keyId = state.step4.currentKeyProblemId;
+    const causeTbody = document.getElementById("s4-cause-tbody");
+    causeTbody.innerHTML = "";
+
+    const parentSelect = document.getElementById("s4-new-parent");
+    while (parentSelect.options.length > 1) parentSelect.remove(1);
+
+    if (!keyId) return;
+
+    const causes = state.step4.causes.filter((c) => c.keyProblemId === keyId);
+    causes.forEach((c, idx) => {
+      const tr = document.createElement("tr");
+      const parent =
+        causes.find((x) => x.id === c.parentId)?.text.slice(0, 24) || "";
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>Why${c.level}</td>
+        <td>${parent}</td>
+        <td><textarea data-cause-id="${c.id}" data-cause-field="text">${
+        c.text || ""
+      }</textarea></td>
+        <td><textarea data-cause-id="${c.id}" data-cause-field="dataNeeded">${
+        c.dataNeeded || ""
+      }</textarea></td>
+        <td><textarea data-cause-id="${c.id}" data-cause-field="evidence">${
+        c.evidence || ""
+      }</textarea></td>
+        <td class="text-right"><button class="btn" data-delete-cause="${
+          c.id
+        }">✕</button></td>
+      `;
+      causeTbody.appendChild(tr);
+    });
+
+    causes.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = `Why${c.level}-${c.text.slice(0, 24)}`;
+      parentSelect.appendChild(opt);
+    });
+  }
+
+  document.getElementById("s4-key-select").addEventListener("change", (e) => {
+    state.step4.currentKeyProblemId = e.target.value;
+    saveState();
+    renderStep4();
+    renderStep5Selects();
+    renderStep6Selects();
+  });
+
+  document.getElementById("btn-s4-add-cause").addEventListener("click", () => {
+    const keyId = state.step4.currentKeyProblemId;
+    if (!keyId) {
+      alert("请先选择一个关键问题。");
+      return;
+    }
+    const text = document.getElementById("s4-new-text").value.trim();
+    if (!text) {
+      alert("请填写原因描述。");
+      return;
+    }
+    const cause = {
+      id: uuid(),
+      keyProblemId: keyId,
+      level: Number(document.getElementById("s4-new-level").value || 1),
+      parentId: document.getElementById("s4-new-parent").value || "",
+      text,
+      dataNeeded: document.getElementById("s4-new-data").value.trim(),
+      evidence: document.getElementById("s4-new-evidence").value.trim(),
+    };
+    state.step4.causes.push(cause);
+    saveState();
+    document.getElementById("s4-new-text").value = "";
+    document.getElementById("s4-new-data").value = "";
+    document.getElementById("s4-new-evidence").value = "";
+    renderStep4();
+    renderStep5Selects();
+  });
+
+  document
+    .getElementById("s4-cause-tbody")
+    .addEventListener("input", (e) => {
+      const id = e.target.dataset.causeId;
+      const field = e.target.dataset.causeField;
+      if (!id || !field) return;
+      const c = state.step4.causes.find((x) => x.id === id);
+      if (!c) return;
+      c[field] = e.target.value;
+      saveState();
+    });
+
+  document
+    .getElementById("s4-cause-tbody")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-cause]");
+      if (!btn) return;
+      const id = btn.dataset.deleteCause;
+      state.step4.causes = state.step4.causes.filter((x) => x.id !== id);
+      saveState();
+      renderStep4();
+      renderStep5Selects();
+    });
+
+  // --------------- Step5 渲染 & 事件 -----------------
+  function renderStep5Selects() {
+    const keySel = document.getElementById("s5-key-select");
+    keySel.innerHTML = "";
+    state.step3.keyProblems.forEach((kp) => {
+      const opt = document.createElement("option");
+      opt.value = kp.id;
+      opt.textContent = kp.sourceText.slice(0, 40);
+      keySel.appendChild(opt);
+    });
+
+    const causeSel = document.getElementById("s5-cause-select");
+    causeSel.innerHTML = "";
+    const keyId = keySel.value || (state.step3.keyProblems[0] || {}).id;
+    if (keyId) keySel.value = keyId;
+    const causes = state.step4.causes.filter((c) => c.keyProblemId === keyId);
+    causes.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = `Why${c.level}-${c.text.slice(0, 30)}`;
+      causeSel.appendChild(opt);
+    });
+
+    renderStep5Plans();
+  }
+
+  function renderStep5Plans() {
+    const tbody = document.getElementById("s5-plan-tbody");
+    tbody.innerHTML = "";
+    state.step5.plans.forEach((p, idx) => {
+      const kp =
+        state.step3.keyProblems.find((k) => k.id === p.keyProblemId) || {};
+      const cause =
+        state.step4.causes.find((c) => c.id === p.causeId) || {};
+      const total =
+        (Number(p.controllable) || 0) +
+        (Number(p.feasible) || 0) +
+        (Number(p.effect) || 0) +
+        (Number(p.cost) || 0);
+      const cls =
+        total >= 16 ? "priority-high" : total >= 12 ? "priority-medium" : "priority-low";
+      tbody.innerHTML += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${kp.sourceText ? kp.sourceText.slice(0, 20) : ""}</td>
+          <td>${cause.text ? cause.text.slice(0, 20) : ""}</td>
+          <td><textarea data-plan-id="${p.id}" data-plan-field="desc">${
+        p.desc || ""
+      }</textarea></td>
+          <td><input type="number" min="1" max="5" data-plan-id="${
+            p.id
+          }" data-plan-field="controllable" value="${p.controllable || 0}"/></td>
+          <td><input type="number" min="1" max="5" data-plan-id="${
+            p.id
+          }" data-plan-field="feasible" value="${p.feasible || 0}"/></td>
+          <td><input type="number" min="1" max="5" data-plan-id="${
+            p.id
+          }" data-plan-field="effect" value="${p.effect || 0}"/></td>
+          <td><input type="number" min="1" max="5" data-plan-id="${
+            p.id
+          }" data-plan-field="cost" value="${p.cost || 0}"/></td>
+          <td class="${cls}">${total}</td>
+          <td class="text-right"><button class="btn" data-delete-plan="${
+            p.id
+          }">✕</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  document.getElementById("btn-s5-add-plan").addEventListener("click", () => {
+    const keyId = document.getElementById("s5-key-select").value;
+    const causeId = document.getElementById("s5-cause-select").value;
+    if (!keyId || !causeId) {
+      alert("请先选择关键问题和原因。");
+      return;
+    }
+    const desc = document.getElementById("s5-new-plan").value.trim();
+    if (!desc) {
+      alert("请填写对策描述。");
+      return;
+    }
+    const p = {
+      id: uuid(),
+      keyProblemId: keyId,
+      causeId,
+      desc,
+      controllable: Number(
+        document.getElementById("s5-new-controllable").value || 0
+      ),
+      feasible: Number(
+        document.getElementById("s5-new-feasible").value || 0
+      ),
+      effect: Number(document.getElementById("s5-new-effect").value || 0),
+      cost: Number(document.getElementById("s5-new-cost").value || 0),
+    };
+    state.step5.plans.push(p);
+    saveState();
+    document.getElementById("s5-new-plan").value = "";
+    renderStep5Plans();
+    renderStep6Selects();
+  });
+
+  document
+    .getElementById("s5-plan-tbody")
+    .addEventListener("input", (e) => {
+      const id = e.target.dataset.planId;
+      const field = e.target.dataset.planField;
+      if (!id || !field) return;
+      const p = state.step5.plans.find((x) => x.id === id);
+      if (!p) return;
+      p[field] = e.target.value;
+      saveState();
+      renderStep5Plans();
+    });
+
+  document
+    .getElementById("s5-plan-tbody")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-plan]");
+      if (!btn) return;
+      const id = btn.dataset.deletePlan;
+      state.step5.plans = state.step5.plans.filter((x) => x.id !== id);
+      saveState();
+      renderStep5Plans();
+      renderStep6Selects();
+    });
+
+  // --------------- Step6 渲染 & 事件 -----------------
+  function renderStep6Selects() {
+    const keySel = document.getElementById("s6-key-select");
+    keySel.innerHTML = "";
+    state.step3.keyProblems.forEach((kp) => {
+      const opt = document.createElement("option");
+      opt.value = kp.id;
+      opt.textContent = kp.sourceText.slice(0, 40);
+      keySel.appendChild(opt);
+    });
+
+    const planSel = document.getElementById("s6-plan-select");
+    planSel.innerHTML = "";
+    const keyId = keySel.value || (state.step3.keyProblems[0] || {}).id;
+    if (keyId) keySel.value = keyId;
+    state.step5.plans
+      .filter((p) => p.keyProblemId === keyId)
+      .forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.desc.slice(0, 40);
+        planSel.appendChild(opt);
+      });
+    renderStep6Actions();
+  }
+
+  function renderStep6Actions() {
+    const tbody = document.getElementById("s6-action-tbody");
+    tbody.innerHTML = "";
+    state.step6.actions.forEach((a, idx) => {
+      const kp =
+        state.step3.keyProblems.find((k) => k.id === a.keyProblemId) || {};
+      const plan = state.step5.plans.find((p) => p.id === a.planId) || {};
+      tbody.innerHTML += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${kp.sourceText ? kp.sourceText.slice(0, 16) : ""}</td>
+          <td>${plan.desc ? plan.desc.slice(0, 16) : ""}</td>
+          <td><textarea data-act-id="${a.id}" data-act-field="task">${
+        a.task || ""
+      }</textarea></td>
+          <td><input data-act-id="${a.id}" data-act-field="owner" value="${
+        a.owner || ""
+      }"/></td>
+          <td><input type="date" data-act-id="${a.id}" data-act-field="start" value="${
+        a.start || ""
+      }"/></td>
+          <td><input type="date" data-act-id="${a.id}" data-act-field="end" value="${
+        a.end || ""
+      }"/></td>
+          <td>
+            <select data-act-id="${a.id}" data-act-field="status">
+              ${renderOptions(["未开始", "进行中", "已完成", "阻塞"], a.status || "")}
+            </select>
+          </td>
+          <td class="text-right"><button class="btn" data-delete-act="${
+            a.id
+          }">✕</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  document.getElementById("btn-s6-add-action").addEventListener("click", () => {
+    const keyId = document.getElementById("s6-key-select").value;
+    const planId = document.getElementById("s6-plan-select").value;
+    if (!keyId || !planId) {
+      alert("请先选择关键问题和对策。");
+      return;
+    }
+    const task = document.getElementById("s6-new-task").value.trim();
+    if (!task) {
+      alert("请填写行动任务内容。");
+      return;
+    }
+    const a = {
+      id: uuid(),
+      keyProblemId: keyId,
+      planId,
+      task,
+      owner: document.getElementById("s6-new-owner").value.trim(),
+      start: document.getElementById("s6-new-start").value,
+      end: document.getElementById("s6-new-end").value,
+      status: "未开始",
+      milestone: document.getElementById("s6-new-milestone").value.trim(),
+    };
+    state.step6.actions.push(a);
+    saveState();
+    document.getElementById("s6-new-task").value = "";
+    document.getElementById("s6-new-milestone").value = "";
+    renderStep6Actions();
+  });
+
+  document
+    .getElementById("s6-action-tbody")
+    .addEventListener("input", (e) => {
+      const id = e.target.dataset.actId;
+      const field = e.target.dataset.actField;
+      if (!id || !field) return;
+      const a = state.step6.actions.find((x) => x.id === id);
+      if (!a) return;
+      a[field] = e.target.value;
+      saveState();
+      renderStep6Actions();
+    });
+
+  document
+    .getElementById("s6-action-tbody")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-act]");
+      if (!btn) return;
+      const id = btn.dataset.deleteAct;
+      state.step6.actions = state.step6.actions.filter((x) => x.id !== id);
+      saveState();
+      renderStep6Actions();
+    });
+
+  // --------------- Step7 渲染 & 事件 -----------------
+  function renderStep7() {
+    document.getElementById("s7-process-notes").value =
+      state.step7.processNotes || "";
+    const tbody = document.getElementById("s7-kpi-tbody");
+    tbody.innerHTML = "";
+    state.step7.kpis.forEach((k, idx) => {
+      const before = Number(k.before);
+      const after = Number(k.after);
+      let pct = "";
+      if (!isNaN(before) && !isNaN(after) && before !== 0) {
+        pct = (((after - before) / Math.abs(before)) * 100).toFixed(1);
+        k.improvePercent = pct;
+      }
+      tbody.innerHTML += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${k.category || ""}</td>
+          <td><textarea data-kpi-id="${k.id}" data-kpi-field="label">${
+        k.label || ""
+      }</textarea></td>
+          <td><input data-kpi-id="${k.id}" data-kpi-field="before" value="${
+        k.before || ""
+      }"/></td>
+          <td><input data-kpi-id="${k.id}" data-kpi-field="target" value="${
+        k.target || ""
+      }"/></td>
+          <td><input data-kpi-id="${k.id}" data-kpi-field="after" value="${
+        k.after || ""
+      }"/></td>
+          <td>${pct ? pct + "%" : ""}</td>
+          <td class="text-right"><button class="btn" data-delete-kpi="${
+            k.id
+          }">✕</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  document
+    .getElementById("s7-kpi-tbody")
+    .addEventListener("input", (e) => {
+      const id = e.target.dataset.kpiId;
+      const field = e.target.dataset.kpiField;
+      if (!id || !field) return;
+      const k = state.step7.kpis.find((x) => x.id === id);
+      if (!k) return;
+      k[field] = e.target.value;
+      saveState();
+      renderStep7();
+    });
+
+  document
+    .getElementById("s7-kpi-tbody")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-kpi]");
+      if (!btn) return;
+      const id = btn.dataset.deleteKpi;
+      state.step7.kpis = state.step7.kpis.filter((x) => x.id !== id);
+      saveState();
+      renderStep7();
+    });
+
+  document
+    .getElementById("s7-process-notes")
+    .addEventListener("input", (e) => {
+      state.step7.processNotes = e.target.value;
+      saveState();
+    });
+
+  document.getElementById("btn-s7-import").addEventListener("click", () => {
+    state.step7.kpis = state.step7.kpis.filter(
+      (k) => k.category !== "目标性指标"
+    );
+    state.step3.keyProblems.forEach((kp) => {
+      state.step7.kpis.push({
+        id: uuid(),
+        category: "目标性指标",
+        refKeyProblemId: kp.id,
+        label: kp.sourceText + " / " + (kp.kpiName || ""),
+        before: kp.currentValue || "",
+        target: kp.targetValue || "",
+        after: "",
+        improvePercent: "",
+      });
+    });
+    saveState();
+    renderStep7();
+  });
+
+  // --------------- Step8 渲染 & 事件 -----------------
+  function renderStep8() {
+    const tbody = document.getElementById("s8-std-tbody");
+    tbody.innerHTML = "";
+    state.step8.standards.forEach((s, idx) => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><textarea data-std-id="${s.id}" data-std-field="title">${
+        s.title || ""
+      }</textarea></td>
+          <td><input data-std-id="${s.id}" data-std-field="owner" value="${
+        s.owner || ""
+      }"/></td>
+          <td><input type="date" data-std-id="${s.id}" data-std-field="due" value="${
+        s.due || ""
+      }"/></td>
+          <td><input type="number" min="0" max="100" data-std-id="${
+            s.id
+          }" data-std-field="progress" value="${s.progress || ""}"/></td>
+          <td class="text-right"><button class="btn" data-delete-std="${
+            s.id
+          }">✕</button></td>
+        </tr>
+      `;
+    });
+
+    document.getElementById("s8-retro").value = state.step8.retro || "";
+  }
+
+  document.getElementById("btn-s8-add-std").addEventListener("click", () => {
+    state.step8.standards.push({
+      id: uuid(),
+      title: "",
+      owner: "",
+      due: "",
+      progress: "",
+    });
+    saveState();
+    renderStep8();
+  });
+
+  document
+    .getElementById("s8-std-tbody")
+    .addEventListener("input", (e) => {
+      const id = e.target.dataset.stdId;
+      const field = e.target.dataset.stdField;
+      if (!id || !field) return;
+      const s = state.step8.standards.find((x) => x.id === id);
+      if (!s) return;
+      s[field] = e.target.value;
+      saveState();
+    });
+
+  document
+    .getElementById("s8-std-tbody")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-std]");
+      if (!btn) return;
+      const id = btn.dataset.deleteStd;
+      state.step8.standards = state.step8.standards.filter(
+        (x) => x.id !== id
+      );
+      saveState();
+      renderStep8();
+    });
+
+  document.getElementById("s8-retro").addEventListener("input", (e) => {
+    state.step8.retro = e.target.value;
+    saveState();
+  });
+
+  // --------------- AI 教练逻辑 -----------------
+  const AI_ENDPOINT = "/api/deepseek-chat"; // 由 Vercel 代理实现
+  const AI_MODEL = "deepseek-chat";
+
+  const AI_PROMPTS = {
+    step1: `
+你是一名资深“问题分析与解决（8步法）”教练，现在要点评学员在【Step1 明确问题与目标】中的填写质量。
+我会给你一个 JSON，包含：理想状态、KPI 目标、当前 KPI、KPI 差距描述、大而模糊的问题、以及 5W2H 现状描述。
+
+请完成：
+1）检查 5W2H 是否完整、具体、可度量，指出哪些项过于模糊或缺失；
+2）判断“大而模糊的问题”与 KPI 差距、5W2H 现状是否逻辑一致，是否真的聚焦在一个核心问题上；
+3）给出 3~5 条改进建议，帮助学员把问题陈述得更清晰、更聚焦；
+4）为下一步【分解问题】提炼一条推荐使用的“总问题句”和一句“简短的 KPI 差距描述”。
+
+请严格用下面的 JSON 返回，不要加解释文字：
+{
+  "coach_comment": "整体评价与关键提醒",
+  "checklist": ["要点1","要点2","要点3"],
+  "next_step": {
+    "big_problem": "推荐的总问题句",
+    "kpi_gap_short": "一句话的 KPI 差距总结"
+  }
+}
+    `,
+    step2: `
+你是“问题逻辑树分解”专家，要点评学员在【Step2 分解问题】中的表现。
+我会给你一个 JSON，包含：Step1 的简要信息、总问题句、以及若干假设问题（字段含：text、dimension、parentId、evidence、importance、urgency、isKey）。
+
+请完成：
+1）判断这些假设问题是否真正以“是否存在……问题”的形式表达，并且是问题而非解决方案；
+2）评估分解维度是否有逻辑：是否体现结构/流程/时间/区域/对象等清晰的划分，是否存在遗漏或交叉；
+3）根据重要度和紧急度，结合你的判断，推荐 1~3 个“更值得深入研究的关键性问题”（引用其 id）；
+4）基于 Step1 的信息，补充 1~3 条你认为可能被遗漏的重要假设问题，并说明要验证这些假设需要收集哪些数据。
+
+请严格用下面的 JSON 返回：
+{
+  "coach_comment": "整体评价与提醒",
+  "improvement_suggestions": ["建议1","建议2"],
+  "suggested_key_hypothesis_ids": ["hypo-id-1","hypo-id-2"],
+  "new_hypotheses": [
+    {
+      "text": "建议新增的假设问题（是否存在……问题）",
+      "dimension": "推荐的分解维度",
+      "data_to_collect": "需要收集哪些数据来验证这个假设"
+    }
+  ]
+}
+    `,
+    step3: `
+你是“目标设定与 KPI 设计”专家，要点评【Step3 关键问题目标设定】。
+JSON 中包含多个 keyProblems：sourceText（关键问题）、goal（目标）、kpiName、currentValue、targetValue、deadline。
+
+任务：
+1）用 SMART 原则检查每一行目标是否：具体、可度量、可达成、与上位目标一致、有时间边界；
+2）指出哪些目标存在：过于模糊、不可控、目标值或期限不合理等问题；
+3）给出 3~5 条整体改进建议；
+4）为下一步原因分析提供一个简洁版“根问题表述列表”，每条包含 keyProblemId 和推荐表述。
+
+输出 JSON：
+{
+  "coach_comment": "整体评价",
+  "problem_items": [
+    {
+      "key_problem_id": "xxx",
+      "issue": "该目标存在的问题说明"
+    }
+  ],
+  "next_step": {
+    "root_problems": [
+      {
+        "key_problem_id": "xxx",
+        "statement": "推荐在原因分析中使用的根问题表述"
+      }
+    ]
+  }
+}
+    `,
+    step4: `
+你是“根本原因分析（5WHY/逻辑树）”专家，要点评【Step4 原因分析】。
+JSON 中包含：所选关键问题信息，以及该问题下的多个原因节点 causes：字段含 level(1-5)、parentId、text、dataNeeded、evidence。
+
+请完成：
+1）检查原因是否真正解释了关键问题，而非简单重复现象或把对策当原因；
+2）判断原因之间的因果链是否合理，有无“跳级”或逻辑断层；
+3）从人/机/料/法/环/测等维度看，是否有明显遗漏；
+4）指出你认为最可能的 1~3 个“根本原因”（给出原因 id）；
+5）为下一步对策制定，给出针对每个根本原因的对策思路方向（不是具体方案，而是方向）。
+
+输出 JSON：
+{
+  "coach_comment": "整体评价",
+  "root_cause_ids": ["cause-id-1","cause-id-2"],
+  "dimension_gaps": ["可能缺失的维度1","维度2"],
+  "next_step": {
+    "countermeasure_directions": [
+      {
+        "cause_id": "cause-id-1",
+        "direction": "对策方向文字"
+      }
+    ]
+  }
+}
+    `,
+    step5: `
+你是“对策设计与评估”专家，要点评【Step5 对策选择与评估】。
+JSON 中包含：关键问题、对应原因，以及 plans：desc、controllable、feasible、effect、cost。
+
+任务：
+1）检查对策是否一一对应到具体原因，是否有“多头管理”“一刀切”等典型问题；
+2）根据四个评分判断哪些对策更值得优先实施；
+3）指出评分存在明显不合理或缺乏依据的地方；
+4）为 Step6 行动计划推荐“优先实施对策列表”。
+
+输出 JSON：
+{
+  "coach_comment": "整体评价",
+  "priority_plans": [
+    {
+      "plan_id": "xxx",
+      "reason": "推荐优先实施的原因"
+    }
+  ],
+  "risk_notes": ["风险提示1","风险提示2"]
+}
+    `,
+    step6: `
+你是“项目执行与进度管理”专家，要点评【Step6 行动计划 & 看板】。
+JSON 中包含多个 actions：task、owner、start、end、status、以及其对应的关键问题和对策信息。
+
+任务：
+1）检查任务是否拆分到足够具体、是否存在责任模糊或时间安排不合理的问题；
+2）指出执行过程中可能出现的资源瓶颈或依赖关系风险；
+3）给出 3~5 条提升执行力的建议，用于 Step7 过程评估的提示。
+
+输出 JSON：
+{
+  "coach_comment": "整体评价",
+  "risk_items": ["风险1","风险2"],
+  "execution_tips": ["建议1","建议2","建议3"]
+}
+    `,
+    step7: `
+你是“项目结果评估”专家，要点评【Step7 过程 & 结果评估】。
+JSON 中包含多条 kpis：category、label、before、target、after、improvePercent，以及过程记录 processNotes。
+
+任务：
+1）检查改善前/后/目标之间的关系是否合理，是否存在明显统计偏差或样本偏差风险；
+2）总结项目在结果上的亮点与不足；
+3）提炼 3~5 条可以复制推广的经验；
+4）为 Step8 标准化给出“推荐标准化要点列表”。
+
+输出 JSON：
+{
+  "coach_comment": "整体评价",
+  "highlights": ["亮点1","亮点2"],
+  "shortcomings": ["不足1","不足2"],
+  "replicable_points": ["可复制要点1","可复制要点2"],
+  "next_step": {
+    "standardization_points": ["建议制定标准的点1","点2"]
+  }
+}
+    `,
+    step8: `
+你是“组织学习与个人成长”教练，要点评【Step8 标准化 & 复盘】。
+JSON 中包含：标准化条目列表 standards（title、owner、due、progress）以及个人复盘 retro，另外也会附带前几步的简要摘要。
+
+任务：
+1）判断标准化条目是否覆盖了本次项目中最关键的做法和经验；
+2）从个人能力的角度，总结学员在本次项目中的优势和需要持续打磨的能力点；
+3）给出 3~5 条下一轮项目可优先尝试的改进方向。
+
+输出 JSON：
+{
+  "coach_comment": "整体评价",
+  "capability_insights": ["能力洞察1","能力洞察2"],
+  "next_cycle_focus": ["下轮项目关注点1","关注点2"]
+}
+    `,
+  };
+
+  async function callAI(stepKey, payload) {
+    const statusEl = document.getElementById(`ai-${stepKey}-status`);
+    const outputEl = document.getElementById(`ai-${stepKey}-output`);
+    statusEl.textContent = "AI 正在思考中，请稍等...";
+    try {
+      const body = {
+        model: AI_MODEL,
+        messages: [
+          { role: "system", content: AI_PROMPTS[stepKey] },
+          {
+            role: "user",
+            content:
+              "下面是本步以及前后步骤的结构化数据（JSON）：\n" +
+              JSON.stringify(payload, null, 2),
+          },
+        ],
+        temperature: 0.2,
+      };
+
+      const res = await fetch(AI_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+      const data = await res.json();
+      const rawText =
+        data.choices?.[0]?.message?.content || "AI 返回为空，请稍后重试。";
+
+      outputEl.textContent = rawText;
+      statusEl.textContent = "AI 反馈已生成。";
+      // 尝试解析 JSON 供“推送到下一步”使用
+      const parsed = parseJsonFromText(rawText);
+      state.ai[stepKey] = parsed;
+      saveState();
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "调用 AI 失败，请检查代理接口或网络。";
+    }
+  }
+
+  function parseJsonFromText(text) {
+    if (!text) return null;
+    let jsonStr = text.trim();
+    const match = jsonStr.match(/```json([\s\S]*?)```/i);
+    if (match) {
+      jsonStr = match[1];
+    }
+    try {
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Step1 AI
+  document.getElementById("btn-ai-step1").addEventListener("click", () => {
+    const payload = {
+      step1: state.step1,
+    };
+    callAI("step1", payload);
+  });
+
+  document.getElementById("btn-ai-step1-apply").addEventListener("click", () => {
+    const j = state.ai.step1;
+    if (!j || !j.next_step) {
+      alert("尚未获得可解析的 AI JSON 结果，请先点击“AI 教练评价本步”。");
+      return;
+    }
+    if (j.next_step.big_problem) {
+      state.step1.bigProblem = j.next_step.big_problem;
+      document.getElementById("s1-big-problem").value = j.next_step.big_problem;
+    }
+    if (j.next_step.kpi_gap_short) {
+      state.step1.gapShort = j.next_step.kpi_gap_short;
+      document.getElementById("s1-gap-short").textContent =
+        j.next_step.kpi_gap_short;
+    }
+    saveState();
+    renderStep2();
+    alert("已将 AI 提炼的大问题和 KPI 差距更新到 Step1，并同步给 Step2。");
+  });
+
+  // Step2 AI
+  document.getElementById("btn-ai-step2").addEventListener("click", () => {
+    const payload = {
+      step1: state.step1,
+      step2: state.step2,
+    };
+    callAI("step2", payload);
+  });
+
+  document.getElementById("btn-ai-step2-apply").addEventListener("click", () => {
+    const j = state.ai.step2;
+    if (!j) {
+      alert("尚未获得可解析的 AI JSON 结果。");
+      return;
+    }
+    // 标记推荐的关键问题
+    if (Array.isArray(j.suggested_key_hypothesis_ids)) {
+      state.step2.hypotheses.forEach((h) => {
+        if (j.suggested_key_hypothesis_ids.includes(h.id)) {
+          h.isKey = true;
+        }
+      });
+    }
+    // 新增 AI 建议的假设问题
+    if (Array.isArray(j.new_hypotheses)) {
+      j.new_hypotheses.forEach((nh) => {
+        if (!nh.text) return;
+        state.step2.hypotheses.push({
+          id: uuid(),
+          text: nh.text,
+          dimension: nh.dimension || "",
+          parentId: "",
+          evidence: "",
+          importance: 3,
+          urgency: 3,
+          isKey: false,
+        });
+      });
+    }
+    saveState();
+    renderStep2();
+    alert("已按 AI 建议更新关键性问题标记，并补充新的假设问题。");
+  });
+
+  // Step3 AI
+  document.getElementById("btn-ai-step3").addEventListener("click", () => {
+    const payload = {
+      step1: state.step1,
+      step2: state.step2,
+      step3: state.step3,
+    };
+    callAI("step3", payload);
+  });
+
+  document.getElementById("btn-ai-step3-apply").addEventListener("click", () => {
+    const j = state.ai.step3;
+    if (!j || !j.next_step || !Array.isArray(j.next_step.root_problems)) {
+      alert("AI 结果中没有可用的 root_problems。");
+      return;
+    }
+    // 暂时只将 root_problems 信息记录到 keyProblems.goal 中（不覆盖已有内容）
+    j.next_step.root_problems.forEach((rp) => {
+      const kp = state.step3.keyProblems.find(
+        (k) => k.id === rp.key_problem_id
+      );
+      if (kp && !kp.goal && rp.statement) {
+        kp.goal = rp.statement;
+      }
+    });
+    saveState();
+    renderStep3();
+    alert("已将 AI 推荐的根问题表述写入对应关键问题的目标描述中。");
+  });
+
+  // Step4 AI
+  document.getElementById("btn-ai-step4").addEventListener("click", () => {
+    const payload = {
+      step3: state.step3,
+      step4: state.step4,
+    };
+    callAI("step4", payload);
+  });
+
+  document.getElementById("btn-ai-step4-apply").addEventListener("click", () => {
+    const j = state.ai.step4;
+    if (!j || !j.next_step) {
+      alert("AI 结果中没有可用的 countermeasure_directions。");
+      return;
+    }
+    // 将对策方向保存到 step5.aiSuggestion 中，供人工参考
+    state.step5.aiSuggestion = j.next_step.countermeasure_directions || [];
+    saveState();
+    alert("已将 AI 推荐的对策方向记录到 Step5，可用于设计具体对策。");
+  });
+
+  // Step5 AI
+  document.getElementById("btn-ai-step5").addEventListener("click", () => {
+    const payload = {
+      step3: state.step3,
+      step4: state.step4,
+      step5: state.step5,
+    };
+    callAI("step5", payload);
+  });
+
+  document.getElementById("btn-ai-step5-apply").addEventListener("click", () => {
+    const j = state.ai.step5;
+    if (!j || !Array.isArray(j.priority_plans)) {
+      alert("AI 结果中没有 priority_plans。");
+      return;
+    }
+    // 目前仅在控制台提示优先对策 id，实际排序仍由用户决定
+    console.log("AI 推荐优先对策：", j.priority_plans);
+    alert("已获取 AI 对优先对策的建议，可结合评分在表格中调整。");
+  });
+
+  // Step6 AI
+  document.getElementById("btn-ai-step6").addEventListener("click", () => {
+    const payload = {
+      step5: state.step5,
+      step6: state.step6,
+    };
+    callAI("step6", payload);
+  });
+
+  document.getElementById("btn-ai-step6-apply").addEventListener("click", () => {
+    alert("AI 对执行风险与节奏的建议主要用于 Step7 过程评估，可在 Step7 复盘时参考。");
+  });
+
+  // Step7 AI
+  document.getElementById("btn-ai-step7").addEventListener("click", () => {
+    const payload = {
+      step3: state.step3,
+      step6: state.step6,
+      step7: state.step7,
+    };
+    callAI("step7", payload);
+  });
+
+  document.getElementById("btn-ai-step7-apply").addEventListener("click", () => {
+    const j = state.ai.step7;
+    if (!j || !j.next_step) {
+      alert("AI 结果中没有 standardization_points。");
+      return;
+    }
+    if (Array.isArray(j.next_step.standardization_points)) {
+      j.next_step.standardization_points.forEach((p) => {
+        state.step8.standards.push({
+          id: uuid(),
+          title: p,
+          owner: "",
+          due: "",
+          progress: "",
+        });
+      });
+      saveState();
+      renderStep8();
+      alert("已根据 AI 建议新增若干标准化条目到 Step8。");
+    }
+  });
+
+  // Step8 AI
+  document.getElementById("btn-ai-step8").addEventListener("click", () => {
+    const payload = {
+      step7: state.step7,
+      step8: state.step8,
+    };
+    callAI("step8", payload);
+  });
+
+  // --------------- 报告生成 & 导出 -----------------
+  function buildReport() {
+    const box = document.getElementById("report-content");
+    const s1 = state.step1;
+    const s2 = state.step2;
+    const s3 = state.step3;
+    const s4 = state.step4;
+    const s5 = state.step5;
+    const s6 = state.step6;
+    const s7 = state.step7;
+    const s8 = state.step8;
+
+    let html = "";
+
+    html += `<div class="report-block">
+      <h3>1. 问题背景与目标</h3>
+      <p><strong>理想状态：</strong>${escapeHtml(s1.ideal || "")}</p>
+      <p><strong>理想 KPIs：</strong>${escapeHtml(s1.idealKPI || "")}</p>
+      <p><strong>当前 KPIs：</strong>${escapeHtml(s1.currentKPI || "")}</p>
+      <p><strong>差距说明：</strong>${escapeHtml(s1.gap || "")}</p>
+      <p><strong>AI 提炼差距：</strong>${escapeHtml(
+        s1.gapShort || ""
+      )}</p>
+      <p><strong>大而模糊的问题：</strong>${escapeHtml(
+        s1.bigProblem || ""
+      )}</p>
+    </div>`;
+
+    html += `<div class="report-block">
+      <h3>2. 现状 5W2H 摘要</h3>
+      <p><strong>What：</strong>${escapeHtml(s1.w.what || "")}</p>
+      <p><strong>Where：</strong>${escapeHtml(s1.w.where || "")}</p>
+      <p><strong>When：</strong>${escapeHtml(s1.w.when || "")}</p>
+      <p><strong>Who：</strong>${escapeHtml(s1.w.who || "")}</p>
+      <p><strong>Why：</strong>${escapeHtml(s1.w.why || "")}</p>
+      <p><strong>How：</strong>${escapeHtml(s1.w.how || "")}</p>
+      <p><strong>How much：</strong>${escapeHtml(s1.w.howmuch || "")}</p>
+    </div>`;
+
+    html += `<div class="report-block">
+      <h3>3. 假设问题分解 & 关键问题</h3>
+      <p>共提出假设问题 ${s2.hypotheses.length} 个，其中标记为关键候选的 ${
+      s2.hypotheses.filter((h) => h.isKey).length
+    } 个。</p>
+    </div>`;
+
+    html += `<div class="report-block">
+      <h3>4. 关键性问题与目标</h3>`;
+    s3.keyProblems.forEach((kp, idx) => {
+      html += `<p><strong>${idx + 1}. 关键问题：</strong>${escapeHtml(
+        kp.sourceText
+      )}</p>
+      <p class="small">目标：${escapeHtml(
+        kp.goal || ""
+      )}；KPI：${escapeHtml(kp.kpiName || "")}；当前值：${escapeHtml(
+        kp.currentValue || ""
+      )}，目标值：${escapeHtml(kp.targetValue || "")}</p>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="report-block">
+      <h3>5. 原因分析摘要</h3>`;
+    state.step3.keyProblems.forEach((kp, idx) => {
+      html += `<p><strong>${idx + 1}. 关键问题：</strong>${escapeHtml(
+        kp.sourceText
+      )}</p>`;
+      const causes = s4.causes.filter((c) => c.keyProblemId === kp.id);
+      if (!causes.length) {
+        html += `<p class="small danger-text">该关键问题暂未填写原因。</p>`;
+      } else {
+        causes
+          .sort((a, b) => a.level - b.level)
+          .forEach((c) => {
+            html += `<p class="small">- Why${c.level}：${escapeHtml(
+              c.text
+            )}</p>`;
+          });
+      }
+    });
+    html += `</div>`;
+
+    html += `<div class="report-block">
+      <h3>6. 对策与行动计划概览</h3>
+      <p>对策数：${s5.plans.length}；行动任务数：${s6.actions.length}</p>
+    </div>`;
+
+    html += `<div class="report-block">
+      <h3>7. 结果评估摘要</h3>`;
+    s7.kpis.forEach((k, idx) => {
+      html += `<p><strong>${idx + 1}. ${escapeHtml(
+        k.label || ""
+      )}</strong></p>
+      <p class="small">改善前：${escapeHtml(k.before || "")}；目标：${escapeHtml(
+        k.target || ""
+      )}；改善后：${escapeHtml(k.after || "")}；改善率：${escapeHtml(
+        k.improvePercent ? k.improvePercent + "%" : ""
+      )}</p>`;
+    });
+    html += `<p><strong>过程关键发现：</strong>${escapeHtml(
+      s7.processNotes || ""
+    )}</p></div>`;
+
+    html += `<div class="report-block">
+      <h3>8. 标准化要点与个人复盘</h3>`;
+    s8.standards.forEach((s, idx) => {
+      html += `<p><strong>${idx + 1}. 标准化内容：</strong>${escapeHtml(
+        s.title || ""
+      )}（责任人：${escapeHtml(s.owner || "")}，计划完成：${escapeHtml(
+        s.due || ""
+      )}）</p>`;
+    });
+    html += `<p><strong>个人复盘：</strong>${escapeHtml(
+      s8.retro || ""
+    )}</p></div>`;
+
+    box.innerHTML = html;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  document
+    .getElementById("btn-report-refresh")
+    .addEventListener("click", buildReport);
+
+  document
+    .getElementById("btn-generate-report")
+    .addEventListener("click", () => {
+      buildReport();
+      document
+        .querySelectorAll(".tab-header button")
+        .forEach((b) =>
+          b.classList.toggle("active", b.dataset.tab === "report")
+        );
+      document
+        .querySelectorAll(".tab-panel")
+        .forEach((p) => p.classList.toggle("active", p.id === "report"));
+    });
+
+  document
+    .getElementById("btn-download-report")
+    .addEventListener("click", () => {
+      buildReport();
+      const html =
+        "<!DOCTYPE html><html><head><meta charset='utf-8'><title>问题分析与解决报告</title></head><body>" +
+        document.getElementById("report-content").innerHTML +
+        "</body></html>";
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "问题分析与解决报告.html";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+  // 清空全部
+  document.getElementById("btn-clear-all").addEventListener("click", () => {
+    if (!confirm("确定要清空本工具中的全部数据吗？此操作不可恢复。")) return;
+    state = structuredClone(defaultState);
+    saveState();
+    location.reload();
+  });
+
+  // 初始渲染
+  initStep1();
+  renderStep2();
+  renderStep3();
+  renderStep4();
+  renderStep5Selects();
+  renderStep6Selects();
+  renderStep7();
+  renderStep8();
+  buildReport();
+</script>
+</body>
+</html>
